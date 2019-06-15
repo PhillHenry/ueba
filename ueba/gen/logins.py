@@ -2,14 +2,22 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def weekends(d):
+    for i in range(d.shape[1]):
+        if i%7 == 0 or i%7 == 1:
+            d[:, i] = 0
+
+
 def data(n, t):
     d = np.random.rand(n, t)
+    weekends(d)
     return d
 
 
 if __name__ == "__main__":
     people = 100
-    days = 365
+    days = 21
     d = data(people, days)
     x = range(people)
     y = range(days)
