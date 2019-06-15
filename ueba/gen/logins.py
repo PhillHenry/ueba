@@ -16,16 +16,25 @@ def data(n, t):
 
 
 if __name__ == "__main__":
-    people = 100
+    people = 10
     days = 21
     d = data(people, days)
+    print(d)
+
     x = range(people)
     y = range(days)
 
     hf = plt.figure()
-    ha = hf.add_subplot(111, projection='3d')
+    ha = hf.add_subplot(121, projection='3d')
 
     X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
     ha.plot_surface(X.T, Y.T, d)
 
-    plt.show()
+    FS = np.fft.fftn(d)
+    print(FS.shape)
+    print(FS)
+
+    ha = hf.add_subplot(221, projection='3d')
+    ha.plot_surface(X.T, Y.T, FS)
+
+    # plt.show()
