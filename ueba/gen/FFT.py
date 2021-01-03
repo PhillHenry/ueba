@@ -3,9 +3,9 @@ import matplotlib.pyplot as p
 import numpy as np
 
 # make up a noisy signal
-dt=0.01
-t= np.arange(0,5,dt)
-f1,f2= 5, 20  #Hz
+dt=1
+t= np.arange(0,42,dt)
+f1,f2= 7, 14  #Hz
 n=t.size
 s0=  0.2*np.sin(2*np.pi*f1*t)+ 0.15 * np.sin(2*np.pi*f2*t)
 sr= np.random.rand(np.size(t))
@@ -17,7 +17,7 @@ fr=np.fft.fftfreq(n,dt)  # a nice helper function to get the frequencies
 fou=np.fft.fft(s)
 
 #make up a narrow bandpass with a Gaussian
-df=0.1
+df=1
 gpl= np.exp(- ((fr-f1)/(2*df))**2)+ np.exp(- ((fr-f2)/(2*df))**2)  # pos. frequencies
 gmn= np.exp(- ((fr+f1)/(2*df))**2)+ np.exp(- ((fr+f2)/(2*df))**2)  # neg. frequencies
 g=gpl+gmn

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     people = 10
     days = 21
     d = data(people, days)
-    print(d)
+    print(d.shape)
 
     x = range(people)
     y = range(days)
@@ -30,11 +30,14 @@ if __name__ == "__main__":
     X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
     ha.plot_surface(X.T, Y.T, d)
 
+    # d -= d.mean(1)
     FS = np.fft.fftn(d)
     print(FS.shape)
-    print(FS)
+    # print(FS)
 
-    ha = hf.add_subplot(221, projection='3d')
+    ha = hf.add_subplot(122, projection='3d')
+    fr = np.fft.fftfreq(days, 1)
+    print(fr.shape)
     ha.plot_surface(X.T, Y.T, FS)
 
-    # plt.show()
+    plt.show()
