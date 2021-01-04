@@ -19,10 +19,14 @@ def data(N, noise=0):
     return xf
 
 
+def ticks_for(frequencies):
+    fr = np.fft.fftfreq(frequencies.shape[0])
+    return np.fft.fftshift(fr)
+
+
 def plot(raw, frequencies):
     f, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    fr = np.fft.fftfreq(frequencies.shape[0])
-    xticks = np.fft.fftshift(fr)
+    xticks = ticks_for(frequencies)
 
     ax1.imshow(raw, cmap=cm.Reds)
     ax2.imshow(frequencies)
@@ -55,8 +59,7 @@ def find_signal_in_fake_data():
             if frequencies[i, j] > max_t:
                 coords = [i, j]
                 max_t = frequencies[i, j]
-    fr = np.fft.fftfreq(frequencies.shape[0])
-    freq = fr[coords[0]]
+    freq = ticks_for(frequencies)[coords[0]]
     print("Max value of {} at {} corresponding to frequency {}".format(max_t, coords, freq))
 
 
