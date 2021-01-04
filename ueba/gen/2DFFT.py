@@ -14,7 +14,7 @@ def data(N, noise=0):
     for i in range(N // period):
         row_idx = offset + (i * period)
         xf[row_idx, :N] = event
-        for _ in range(N):
+        for _ in range(noise):
             xf[row_idx, r.randint(0, N - 1)] = 0
     return xf
 
@@ -38,7 +38,7 @@ def plot(raw, frequencies):
 
 def find_signal_in_fake_data():
     N = 40
-    raw = data(N, 3)
+    raw = data(N, 10)
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
