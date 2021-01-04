@@ -36,8 +36,11 @@ if __name__ == "__main__":
     # print(FS)
 
     ha = hf.add_subplot(122, projection='3d')
-    fr = np.fft.fftfreq(days, 1)
+    fr = np.fft.fftfreq(days, 0.1)
     print(fr.shape)
-    ha.plot_surface(X.T, Y.T, FS)
+    X, Y = np.meshgrid(x, fr)
+    d -= d.mean()
+    fou = np.fft.fft(d)
+    ha.plot_surface(X.T, Y.T, np.fft.fftshift(np.abs(fou) ))
 
     plt.show()
