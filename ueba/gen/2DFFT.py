@@ -19,23 +19,31 @@ def data(N, noise=0):
     return xf
 
 
-N = 40
-f, (ax1, ax2, ax3) = plt.subplots(3, 1)
-xf = data(N, 3)
+def plot(raw, frequencies):
+    f, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    fr = np.fft.fftfreq(frequencies.shape[0])
+    xticks = np.fft.fftshift(fr)
 
-xf -= xf.mean()
-Z = np.fft.fftn(xf)
-frequencies = np.fft.fftshift(np.abs(Z))
-fr = np.fft.fftfreq(N)
-xticks = np.fft.fftshift(fr)
+    ax1.imshow(raw, cmap=cm.Reds)
+    ax2.imshow(frequencies)
+    tick_range = np.arange(min(xticks), max(xticks), 0.2)
+    tick_labels = list(map(lambda x: '%.2f' % x, tick_range))
+    print(tick_labels)
+    ax2.set_xticklabels(tick_labels)
+    ax2.set_yticklabels(tick_labels)
 
-ax1.imshow(xf, cmap=cm.Reds)
-ax2.imshow(frequencies)
-tick_range = np.arange(min(xticks), max(xticks), 0.2)
-tick_labels = list(map(lambda x: '%.2f' % x, tick_range))
-print(tick_labels)
-ax2.set_xticklabels(tick_labels)
-ax2.set_yticklabels(tick_labels)
+    ax3.plot(xticks, frequencies)
+    plt.show()
 
-ax3.plot(xticks, frequencies)
-plt.show()
+
+def find_signal_in_fake_data():
+    N = 40
+    raw = data(N, 3)
+    raw -= raw.mean()
+    Z = np.fft.fftn(raw)
+    frequencies = np.fft.fftshift(np.abs(Z))
+    plot(raw, frequencies)
+
+
+if __name__ == "__main__":
+    find_signal_in_fake_data()
