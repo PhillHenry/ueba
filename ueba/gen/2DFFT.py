@@ -17,16 +17,18 @@ def data():
     xf[offset + 4 * period, :N] = event
     return xf
 
+
 N = 30
 f, (ax1, ax2, ax3) = plt.subplots(3, 1)
 xf = data()
 
-Z = ifftn(xf)
+xf -= xf.mean()
+Z = np.fft.fftn(xf)
+
 ax1.imshow(xf, cmap=cm.Reds)
 ax2.imshow(np.real(Z), cmap=cm.gray)
-d = np.real(Z)
-d -= d.mean(0)
+
 dt = 0.1
-fr = np.fft.fftfreq(N,dt)
-ax3.plot(np.fft.fftshift(fr), np.abs(d))
+fr = np.fft.fftfreq(N)
+ax3.plot(np.fft.fftshift(fr), np.fft.fftshift(np.abs(Z)))
 plt.show()

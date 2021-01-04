@@ -37,7 +37,7 @@ p.plot(t,s)
 p.title('data w/ noise')
 
 p.subplot(513)
-p.plot(np.fft.fftshift(fr) ,np.fft.fftshift(np.abs(fou) )  )
+p.plot(np.fft.fftshift(fr), np.fft.fftshift(np.abs(fou) )  )
 p.title('spectrum of noisy data')
 
 p.subplot(514)
