@@ -8,24 +8,25 @@ import numpy as np
 def data(N):
     xf = np.random.rand(N, N)
     event = 1.
-    period = 4
+    period = 8
     offset = 1
     for i in range(N // period):
         xf[offset + (i * period), :N] = event
     return xf
 
 
-N = 30
+N = 40
 f, (ax1, ax2, ax3) = plt.subplots(3, 1)
 xf = data(N)
 
 xf -= xf.mean()
 Z = np.fft.fftn(xf)
+frequencies = np.fft.fftshift(np.abs(Z))
 
 ax1.imshow(xf, cmap=cm.Reds)
-ax2.imshow(np.real(Z), cmap=cm.gray)
+ax2.imshow(frequencies)
 
 dt = 0.1
 fr = np.fft.fftfreq(N)
-ax3.plot(np.fft.fftshift(fr), np.fft.fftshift(np.abs(Z)))
+ax3.plot(np.fft.fftshift(fr), frequencies)
 plt.show()
