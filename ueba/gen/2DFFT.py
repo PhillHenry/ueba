@@ -36,14 +36,30 @@ def plot(raw, frequencies):
     plt.show()
 
 
-def find_signal_in_fake_data():
-    N = 40
-    raw = data(N, 10)
+def frequencies_for(N):
+    raw = data(N, 15)
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
     plot(raw, frequencies)
+    return frequencies
+
+
+def find_signal_in_fake_data():
+    frequencies = frequencies_for(40)
+    max_t = float("-inf")
+    coords = None
+    x_range = range(1, frequencies.shape[0] - 1)
+    for i in x_range:
+        for j in x_range:
+            if frequencies[i, j] > max_t:
+                coords = [i, j]
+                max_t = frequencies[i, j]
+    fr = np.fft.fftfreq(frequencies.shape[0])
+    freq = fr[coords[0]]
+    print("Max value of {} at {} corresponding to frequency {}".format(max_t, coords, freq))
 
 
 if __name__ == "__main__":
     find_signal_in_fake_data()
+
