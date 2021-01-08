@@ -6,10 +6,9 @@ import random as r
 
 
 # from https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html
-def data(N, noise=0):
+def data(N, period, noise=0):
     xf = np.random.rand(N, N)
     event = 1.
-    period = 8
     offset = 1
     for i in range(N // period):
         row_idx = offset + (i * period)
@@ -40,8 +39,8 @@ def plot(raw, frequencies):
     plt.show()
 
 
-def frequencies_for(N):
-    raw = data(N, 15)
+def frequencies_for(N, period):
+    raw = data(N, period, 15)
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
@@ -50,17 +49,32 @@ def frequencies_for(N):
 
 
 def find_signal_in_fake_data():
-    frequencies = frequencies_for(40)
+    N = 40
+    period = 8
+    frequencies = frequencies_for(N, period)
     max_t = float("-inf")
     coords = None
     x_range = range(1, frequencies.shape[0] - 1)
     for i in x_range:
         for j in x_range:
-            if frequencies[i, j] > max_t:
+            f = frequencies[i, j]
+            if f > max_t:
                 coords = [i, j]
-                max_t = frequencies[i, j]
-    freq = ticks_for(frequencies)[coords[0]]
-    print("Max value of {} at {} corresponding to frequency {}".format(max_t, coords, freq))
+                max_t = f
+    indx_row_w_max = coords[0]
+    ticks = ticks_for(frequencies)
+    freq_of_max = ticks[indx_row_w_max]
+    print("Max value of {} at {} corresponding to frequency {}".format(max_t, coords, freq_of_max))
+    column = frequencies[:, coords[1]]
+    max_val_cols = sorted(column)
+    f_to_coords = zip(column, [(i, coords[1]) for i in range(N)])
+    candidates = list(filter(lambda x: x[0] > (0.8 * max_t), f_to_coords))
+    print("candidates = {}".format(candidates))
+    xs = list(map(lambda x: x[1][0], candidates))
+    f_candidates = ticks[xs]
+    print("potential frequencies: {}".format(f_candidates))
+    candidate = min(filter(lambda x: x > 0, f_candidates))
+    print("discovered value = {} actual value = {}".format(1./candidate, period))
 
 
 if __name__ == "__main__":
