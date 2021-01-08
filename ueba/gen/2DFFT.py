@@ -61,19 +61,22 @@ def find_signal_in_fake_data():
             if f > max_t:
                 coords = [i, j]
                 max_t = f
+    analyse(coords, frequencies, max_t, N, period)
+
+
+def analyse(coords, frequencies, max_t, N, period):
     indx_row_w_max = coords[0]
     ticks = ticks_for(frequencies)
     freq_of_max = ticks[indx_row_w_max]
     print("Max value of {} at {} corresponding to frequency {}".format(max_t, coords, freq_of_max))
     column = frequencies[:, coords[1]]
-    max_val_cols = sorted(column)
     f_to_coords = zip(column, [(i, coords[1]) for i in range(N)])
-    candidates = list(filter(lambda x: x[0] > (0.8 * max_t), f_to_coords))
-    print("candidates = {}".format(candidates))
-    xs = list(map(lambda x: x[1][0], candidates))
-    f_candidates = ticks[xs]
-    print("potential frequencies: {}".format(f_candidates))
-    candidate = min(filter(lambda x: x > 0, f_candidates))
+    peaks = list(filter(lambda x: x[0] > (0.8 * max_t), f_to_coords))
+    print("peaks = {}".format(peaks))
+    points_max = list(map(lambda x: x[1][0], peaks))
+    freqs_w_max_amplitude = set(map(lambda x: abs(x), ticks[points_max]))
+    print("potential frequencies: {}".format(freqs_w_max_amplitude))
+    candidate = min(filter(lambda x: x > 0, freqs_w_max_amplitude))
     print("discovered value = {} actual value = {}".format(1./candidate, period))
 
 
