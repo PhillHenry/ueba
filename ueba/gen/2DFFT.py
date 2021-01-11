@@ -1,23 +1,12 @@
-from scipy.fft import ifftn, fftn
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import numpy as np
 import random as r
+
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import numpy as np
+import data as d
 
 
 # from https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html
-def data(N, period, noise=0):
-    xf = np.random.rand(N, N)
-    event = 1.
-    offset = 1
-    for i in range(N // period):
-        row_idx = offset + (i * period)
-        xf[row_idx, :N] = event
-        for _ in range(noise):
-            xf[row_idx, r.randint(0, N - 1)] = 0
-    return xf
-
-
 def ticks_for(frequencies):
     fr = np.fft.fftfreq(frequencies.shape[0])
     return np.fft.fftshift(fr)
@@ -40,7 +29,7 @@ def plot(raw, frequencies):
 
 
 def frequencies_for(N, period):
-    raw = data(N, period, 15)
+    raw = d.data(N, period, 15)
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
