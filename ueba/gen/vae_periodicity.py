@@ -39,20 +39,39 @@ def randoms(num, d):
     return np.vstack(xs)
 
 
+def create_model(shape):
+    m = Sequential()
+    m.add(Dense(512,  activation='elu', input_shape=shape))
+    m.add(Dense(128,  activation='elu'))
+    m.add(Dense(2,    activation='linear', name="bottleneck"))
+    m.add(Dense(128,  activation='elu'))
+    m.add(Dense(512,  activation='elu'))
+    m.add(Dense(784,  activation='sigmoid'))
+    m.compile(loss='mean_squared_error', optimizer = Adam())
+    return m
+
+
+def plot(Zenc, Renc, x, ys):
+    plt.subplot(121)
+    plt.title('bottleneck representation')
+    plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
+
+    plt.subplot(122)
+    arbitrary = np.reshape(Renc[0], [n, n])
+    plt.title('random reconstruction')
+    plt.imshow(arbitrary, cmap=cm.Reds)
+
+    plt.tight_layout()
+    plt.show()
+
+
 sample_size = 200
 n = 28
 period = 5
 x_train = samples(sample_size, n, period)
 x_test = samples(sample_size, n, period)
 
-m = Sequential()
-m.add(Dense(512,  activation='elu', input_shape=vector_shape(n)))
-m.add(Dense(128,  activation='elu'))
-m.add(Dense(2,    activation='linear', name="bottleneck"))
-m.add(Dense(128,  activation='elu'))
-m.add(Dense(512,  activation='elu'))
-m.add(Dense(784,  activation='sigmoid'))
-m.compile(loss='mean_squared_error', optimizer = Adam())
+m = create_model(vector_shape(n))
 
 print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
 
@@ -67,17 +86,8 @@ Renc = m.predict(x_train)        # reconstruction
 anomoly = encoder.predict(randoms(sample_size, n))  # no periodicity
 Zenc = np.vstack([Zenc, anomoly])
 x = np.shape(Zenc)[0]
-plt.subplot(121)
-plt.title('bottleneck representation')
 ys = np.zeros([x,])
 ys[sample_size:] = 1
-plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
 
-plt.subplot(122)
-arbitrary = np.reshape(Renc[0], [n, n])
-plt.title('random reconstruction')
-plt.imshow(arbitrary, cmap=cm.Reds)
-
-plt.tight_layout()
-plt.show()
+plot(Zenc, Renc, x, ys)
 
