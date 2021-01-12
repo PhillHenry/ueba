@@ -36,7 +36,7 @@ def samples(num, d, period):
     return np.vstack(xs)
 
 
-def randoms(num, d):
+def randoms(num, n):
     xs = []
     for _ in range(num):
         xs.append(np.random.rand(n * n))
@@ -55,7 +55,7 @@ def create_model(shape):
     return m
 
 
-def plot(Zenc, Renc, x, ys):
+def plot(Zenc, Renc, x, ys, n):
     plt.subplot(311)
     plt.title('bottleneck representation')
     plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
@@ -66,35 +66,6 @@ def plot(Zenc, Renc, x, ys):
     plt.imshow(arbitrary, cmap=cm.Reds)
 
     return plt
-
-
-sample_size = 256
-n = 28
-period = 5
-x_train = samples(sample_size, n, period)
-x_test = samples(sample_size, n, period)
-
-m = create_model(vector_shape(n))
-
-print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
-
-history = m.fit(x_train, x_train, batch_size=128, epochs=10, verbose=1,
-                validation_data=(x_test, x_test))
-
-encoder = Model(m.input, m.get_layer('bottleneck').output)
-periodicals = encoder.predict(x_train)  # bottleneck representation
-Renc = m.predict(x_train)        # reconstruction
-
-
-baseline = encoder.predict(randoms(sample_size, n))  # no periodicity
-mixed = np.vstack([periodicals, baseline])
-n_total = np.shape(mixed)[0]
-ys = np.zeros([n_total, ])
-ys[sample_size:] = 1
-
-kmeans = KMeans(n_clusters=2, random_state=0).fit(mixed)
-n_periodicals = np.shape(periodicals)[0]
-n_baseline = np.shape(baseline)[0]
 
 
 def correct(matching, x):
@@ -110,25 +81,60 @@ def correct(matching, x):
             return 0
 
 
-predicted_to_actual = list(zip(kmeans.labels_, ys))
-n_matching = sum(map(lambda x: x[0] * x[1], predicted_to_actual))
-labels_match = n_matching >= (n_baseline + n_periodicals) / 2
-results = list(map(lambda x: correct(labels_match, x), predicted_to_actual))
-n_correct = sum(results)
+def calc_accuracy(mixed, periodicals, baseline, ys):
+    kmeans = KMeans(n_clusters=2, random_state=0).fit(mixed)
+    n_periodicals = np.shape(periodicals)[0]
+    n_baseline = np.shape(baseline)[0]
+    predicted_to_actual = list(zip(kmeans.labels_, ys))
+    n_matching = sum(map(lambda x: x[0] * x[1], predicted_to_actual))
+    labels_match = n_matching >= (n_baseline + n_periodicals) / 2
+    results = list(map(lambda x: correct(labels_match, x), predicted_to_actual))
+    n_correct = sum(results)
 
-print("accuracy {}".format(float(n_correct) / float(n_periodicals + n_baseline)))
+    print("accuracy {}".format(float(n_correct) / float(n_periodicals + n_baseline)))
 
-plt = plot(mixed, Renc, n_total, ys)
 
-print(history.history.keys())
+def run():
+    sample_size = 256
+    n = 28
+    period = 5
+    x_train = samples(sample_size, n, period)
+    x_test = samples(sample_size, n, period)
 
-# see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
-# summarize history for loss
-plt.subplot(313)
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper right')
-plt.show()
+    m = create_model(vector_shape(n))
+
+    print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
+
+    history = m.fit(x_train, x_train, batch_size=128, epochs=10, verbose=1,
+                    validation_data=(x_test, x_test))
+
+    encoder = Model(m.input, m.get_layer('bottleneck').output)
+    periodicals = encoder.predict(x_train)  # bottleneck representation
+    Renc = m.predict(x_train)        # reconstruction
+
+    baseline = encoder.predict(randoms(sample_size, n))  # no periodicity
+    mixed = np.vstack([periodicals, baseline])
+    n_total = np.shape(mixed)[0]
+    ys = np.zeros([n_total, ])
+    ys[sample_size:] = 1
+
+    calc_accuracy(mixed, periodicals, baseline, ys)
+
+    plt = plot(mixed, Renc, n_total, ys, n)
+
+    print(history.history.keys())
+
+    # see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
+    # summarize history for loss
+    plt.subplot(313)
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper right')
+    plt.show()
+
+
+if __name__ == "__main__":
+    run()
