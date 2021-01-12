@@ -80,18 +80,22 @@ history = m.fit(x_train, x_train, batch_size=128, epochs=5, verbose=1,
                 validation_data=(x_test, x_test))
 
 encoder = Model(m.input, m.get_layer('bottleneck').output)
-Zenc = encoder.predict(x_train)  # bottleneck representation
+periodicals = encoder.predict(x_train)  # bottleneck representation
 Renc = m.predict(x_train)        # reconstruction
 
 
-anomoly = encoder.predict(randoms(sample_size, n))  # no periodicity
-Zenc = np.vstack([Zenc, anomoly])
-x = np.shape(Zenc)[0]
-ys = np.zeros([x,])
+baseline = encoder.predict(randoms(sample_size, n))  # no periodicity
+mixed = np.vstack([periodicals, baseline])
+n_total = np.shape(mixed)[0]
+ys = np.zeros([n_total, ])
 ys[sample_size:] = 1
 
-kmeans = KMeans(n_clusters=2, random_state=0).fit(Zenc)
-print("kmeans\n{}".format(kmeans.labels_))
+kmeans = KMeans(n_clusters=2, random_state=0).fit(mixed)
+n_periodicals = np.shape(periodicals)[0]
+n_baseline = np.shape(baseline)[0]
+accuracy_1 = float(sum(kmeans.labels_[:n_periodicals])) / n_periodicals
+accuracy_2 = float(sum(kmeans.labels_[n_periodicals:])) / n_baseline
+print("accuracy in group 1 = {}, in group 2 = {}".format(1 - accuracy_1, accuracy_2))
 
-plot(Zenc, Renc, x, ys)
+plot(mixed, Renc, n_total, ys)
 
