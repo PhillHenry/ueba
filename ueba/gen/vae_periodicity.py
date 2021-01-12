@@ -7,6 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Dense
 from keras.optimizers import Adam
 import matplotlib.cm as cm
+from sklearn.cluster import KMeans
 
 import data as d
 
@@ -88,6 +89,9 @@ Zenc = np.vstack([Zenc, anomoly])
 x = np.shape(Zenc)[0]
 ys = np.zeros([x,])
 ys[sample_size:] = 1
+
+kmeans = KMeans(n_clusters=2, random_state=0).fit(Zenc)
+print("kmeans\n{}".format(kmeans.labels_))
 
 plot(Zenc, Renc, x, ys)
 
