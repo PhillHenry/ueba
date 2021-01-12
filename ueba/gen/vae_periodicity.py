@@ -12,6 +12,9 @@ from sklearn.cluster import KMeans
 import data as d
 
 
+# Inspired by https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca
+
+
 def vector_shape(n):
     return (n * n,)
 
@@ -48,25 +51,24 @@ def create_model(shape):
     m.add(Dense(128,  activation='elu'))
     m.add(Dense(512,  activation='elu'))
     m.add(Dense(784,  activation='sigmoid'))
-    m.compile(loss='mean_squared_error', optimizer = Adam())
+    m.compile(loss='mean_squared_error', optimizer=Adam())
     return m
 
 
 def plot(Zenc, Renc, x, ys):
-    plt.subplot(121)
+    plt.subplot(311)
     plt.title('bottleneck representation')
     plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
 
-    plt.subplot(122)
+    plt.subplot(312)
     arbitrary = np.reshape(Renc[0], [n, n])
     plt.title('random reconstruction')
     plt.imshow(arbitrary, cmap=cm.Reds)
 
-    plt.tight_layout()
-    plt.show()
+    return plt
 
 
-sample_size = 200
+sample_size = 256
 n = 28
 period = 5
 x_train = samples(sample_size, n, period)
@@ -116,5 +118,17 @@ n_correct = sum(results)
 
 print("accuracy {}".format(float(n_correct) / float(n_periodicals + n_baseline)))
 
-plot(mixed, Renc, n_total, ys)
+plt = plot(mixed, Renc, n_total, ys)
 
+print(history.history.keys())
+
+# see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
+# summarize history for loss
+plt.subplot(313)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper right')
+plt.show()
