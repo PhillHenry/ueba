@@ -6,16 +6,13 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense
 from keras.optimizers import Adam
+import matplotlib.cm as cm
 
 import data as d
 
 
 def vector_shape(n):
     return (n * n,)
-
-
-def fake_data(n, period):
-    return samples(100, n, period)
 
 
 def sample(n, period):
@@ -31,11 +28,11 @@ def samples(num, d, period):
     return np.vstack(xs)
 
 
+sample_size = 200
 n = 28
 period = 5
-x_train = fake_data(n, period)
-x_test = fake_data(n, period)
-y_train = fake_data(n, period)
+x_train = samples(sample_size, n, period)
+x_test = samples(sample_size, n, period)
 
 m = Sequential()
 m.add(Dense(512,  activation='elu', input_shape=vector_shape(n)))
@@ -48,18 +45,25 @@ m.compile(loss='mean_squared_error', optimizer = Adam())
 
 print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
 
-history = m.fit(x_train, x_train, batch_size=128, epochs=5000, verbose=1,
+history = m.fit(x_train, x_train, batch_size=128, epochs=5, verbose=1,
                 validation_data=(x_test, x_test))
 
 encoder = Model(m.input, m.get_layer('bottleneck').output)
 Zenc = encoder.predict(x_train)  # bottleneck representation
 Renc = m.predict(x_train)        # reconstruction
 
-plt.title('Autoencoder')
-x = 100
-plt.scatter(Zenc[:x,0], Zenc[:x,1], s=8, cmap='tab10')
-plt.gca().get_xaxis().set_ticklabels([])
-plt.gca().get_yaxis().set_ticklabels([])
+print("Renc shape   = {}".format(np.shape(Renc)))
+print("Renc         \n{}".format(Renc))
+
+x = np.shape(Zenc)[0]
+plt.subplot(121)
+plt.title('bottleneck representation')
+plt.scatter(Zenc[:x, 0], Zenc[:x, 1], s=8, cmap='tab10')
+
+plt.subplot(122)
+arbitrary = np.reshape(Renc[0], [n, n])
+plt.title('random reconstruction')
+plt.imshow(arbitrary, cmap=cm.Reds)
 
 plt.tight_layout()
 plt.show()
