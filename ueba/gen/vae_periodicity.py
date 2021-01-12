@@ -21,7 +21,7 @@ def square_to_vector(raw, n):
 
 
 def sample(n, period):
-    raw = d.square_data(n, period)
+    raw = d.square_data_mixed_periods(n, period)
     v = square_to_vector(raw, n)
     return v
 
@@ -76,7 +76,7 @@ m = create_model(vector_shape(n))
 
 print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
 
-history = m.fit(x_train, x_train, batch_size=128, epochs=5, verbose=1,
+history = m.fit(x_train, x_train, batch_size=128, epochs=10, verbose=1,
                 validation_data=(x_test, x_test))
 
 encoder = Model(m.input, m.get_layer('bottleneck').output)
@@ -93,9 +93,21 @@ ys[sample_size:] = 1
 kmeans = KMeans(n_clusters=2, random_state=0).fit(mixed)
 n_periodicals = np.shape(periodicals)[0]
 n_baseline = np.shape(baseline)[0]
-accuracy_1 = float(sum(kmeans.labels_[:n_periodicals])) / n_periodicals
-accuracy_2 = float(sum(kmeans.labels_[n_periodicals:])) / n_baseline
-print("accuracy in group 1 = {}, in group 2 = {}".format(1 - accuracy_1, accuracy_2))
+
+
+def correct(matching, x):
+    if not(matching and x[0] == x[1]):
+        return 1
+    else:
+        return 0
+
+
+predicted_to_actual = list(zip(kmeans.labels_, ys))
+labels_match = sum(map(lambda x: x[0] * x[1], predicted_to_actual)) < (n_baseline + n_periodicals) / 2
+results = list(map(lambda x: correct(labels_match, x), predicted_to_actual))
+n_correct = sum(results)
+
+print("accuracy {}".format(float(n_correct) / float(n_periodicals + n_baseline)))
 
 plot(mixed, Renc, n_total, ys)
 
