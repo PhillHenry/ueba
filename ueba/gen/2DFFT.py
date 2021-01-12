@@ -29,7 +29,7 @@ def plot(raw, frequencies):
 
 
 def frequencies_for(N, period):
-    raw = d.data(N, period, 15)
+    raw = d.square_data(N, period, 24)
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
@@ -38,7 +38,7 @@ def frequencies_for(N, period):
 
 
 def find_signal_in_fake_data():
-    N = 40
+    N = 64
     period = 8
     frequencies = frequencies_for(N, period)
     max_t = float("-inf")

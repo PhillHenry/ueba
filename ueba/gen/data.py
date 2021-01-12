@@ -3,7 +3,7 @@ import random as r
 import numpy as np
 
 
-def data(N, period, noise=0):
+def square_data(N, period, noise=0):
     xf = np.random.rand(N, N)
     event = 1.
     offset = 1
