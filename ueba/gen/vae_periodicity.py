@@ -96,14 +96,21 @@ n_baseline = np.shape(baseline)[0]
 
 
 def correct(matching, x):
-    if not(matching and x[0] == x[1]):
-        return 1
+    if matching:
+        if x[0] == x[1]:
+            return 1
+        else:
+            return 0
     else:
-        return 0
+        if x[0] != x[1]:
+            return 1
+        else:
+            return 0
 
 
 predicted_to_actual = list(zip(kmeans.labels_, ys))
-labels_match = sum(map(lambda x: x[0] * x[1], predicted_to_actual)) < (n_baseline + n_periodicals) / 2
+n_matching = sum(map(lambda x: x[0] * x[1], predicted_to_actual))
+labels_match = n_matching >= (n_baseline + n_periodicals) / 2
 results = list(map(lambda x: correct(labels_match, x), predicted_to_actual))
 n_correct = sum(results)
 
