@@ -35,7 +35,7 @@ def samples(num, d, period):
 def randoms(num, d):
     xs = []
     for _ in range(num):
-        xs.append(sample(d, period))
+        xs.append(np.random.rand(n * n))
     return np.vstack(xs)
 
 
@@ -64,20 +64,14 @@ Zenc = encoder.predict(x_train)  # bottleneck representation
 Renc = m.predict(x_train)        # reconstruction
 
 
-anomoly = encoder.predict(np.reshape(np.random.rand(n * n), [1, n*n]))  # no periodicity
-print("anomoly shape    = {}".format(np.shape(anomoly)))
-print("Zenc shape       = {}".format(np.shape(Zenc)))
+anomoly = encoder.predict(randoms(sample_size, n))  # no periodicity
 Zenc = np.vstack([Zenc, anomoly])
 x = np.shape(Zenc)[0]
 plt.subplot(121)
 plt.title('bottleneck representation')
 ys = np.zeros([x,])
-ys[x-1] = 1
+ys[sample_size:] = 1
 plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
-
-
-print("Renc shape   = {}".format(np.shape(Zenc)))
-print("Renc         \n{}".format(Zenc))
 
 plt.subplot(122)
 arbitrary = np.reshape(Renc[0], [n, n])
