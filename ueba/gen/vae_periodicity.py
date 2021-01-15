@@ -116,7 +116,6 @@ def matches(xs, ys):
 def plot_loss(history):
     # see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
     # summarize history for loss
-
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')

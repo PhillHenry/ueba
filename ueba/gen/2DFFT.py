@@ -3,7 +3,7 @@ import random as r
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
-import data as d
+import ueba.gen.data as d
 
 
 # from https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html

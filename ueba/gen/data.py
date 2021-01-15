@@ -14,11 +14,13 @@ def create_random_square(n):
 def square_data(n, period, noise=0):
     xf = create_random_square(n)
     offset = 1
-    for i in range(n // period):
+    top = max(n, n // period + 1)
+    for i in range(top):
         row_idx = offset + (i * period)
-        xf[row_idx, :n] = event
-        for _ in range(noise):
-            xf[row_idx, r.randint(0, n - 1)] = 0
+        if row_idx < n:
+            xf[row_idx, :n] = event
+            for _ in range(noise):
+                xf[row_idx, r.randint(0, n - 1)] = 0
     return xf
 
 
@@ -53,4 +55,6 @@ if __name__ == "__main__":
         xs = square_data_mixed_periods(n, period, noise)
         plt.subplot(234 + i)
         plt.imshow(xs, cmap=cm.Reds)
+    plt.figtext(.6, .47, "Regular activity with noise")
+    plt.figtext(.6, .95, "Mixed periods with noise")
     plt.show()
