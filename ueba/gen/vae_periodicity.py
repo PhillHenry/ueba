@@ -8,8 +8,9 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import matplotlib.cm as cm
 from sklearn.cluster import KMeans
+import pandas as pd
 
-import data as d
+import ueba.gen.data as d
 
 
 # Inspired by https://stats.stackexchange.com/questions/190148/building-an-autoencoder-in-tensorflow-to-surpass-pca
@@ -23,16 +24,29 @@ def square_to_vector(raw, n):
     return np.reshape(raw, vector_shape(n))
 
 
-def sample(n, period):
-    raw = d.square_data_mixed_periods(n, period)
+def sample_mixed_periods(n, max_period, noise):
+    raw = d.square_data_mixed_periods(n, max_period, noise)
     v = square_to_vector(raw, n)
     return v
 
 
-def samples(num, d, period):
+def sample_fixed_period(n, max_period, noise):
+    raw = d.square_data(n, max_period, noise)
+    v = square_to_vector(raw, n)
+    return v
+
+
+def samples_fixed_period(num, n, period, noise):
     xs = []
     for _ in range(num):
-        xs.append(sample(d, period))
+        xs.append(sample_fixed_period(n, period, noise))
+    return np.vstack(xs)
+
+
+def samples(num, n, period, noise):
+    xs = []
+    for _ in range(num):
+        xs.append(sample_mixed_periods(n, period, noise))
     return np.vstack(xs)
 
 
@@ -81,25 +95,33 @@ def correct(matching, x):
             return 0
 
 
-def calc_accuracy(mixed, periodicals, baseline, ys):
+def calc_accuracy(mixed, ys):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(mixed)
-    n_periodicals = np.shape(periodicals)[0]
-    n_baseline = np.shape(baseline)[0]
-    predicted_to_actual = list(zip(kmeans.labels_, ys))
-    n_matching = sum(map(lambda x: x[0] * x[1], predicted_to_actual))
-    labels_match = n_matching >= (n_baseline + n_periodicals) / 2
+    xs = kmeans.labels_
+
+    n_correct = matches(xs, ys)
+
+    print("accuracy {}".format(float(n_correct) / len(ys)))
+
+
+def matches(xs, ys):
+    assert(len(xs) == len(ys))
+    n_total = len(xs)
+    predicted_to_actual = list(zip(xs, ys))
+    n_matching = sum(map(lambda x: 1 if x[0] == x[1] else 0, predicted_to_actual))
+    labels_match = n_matching >= n_total / 2
     results = list(map(lambda x: correct(labels_match, x), predicted_to_actual))
     n_correct = sum(results)
-
-    print("accuracy {}".format(float(n_correct) / float(n_periodicals + n_baseline)))
+    return n_correct
 
 
 def run():
     sample_size = 256
     n = 28
     period = 5
-    x_train = samples(sample_size, n, period)
-    x_test = samples(sample_size, n, period)
+    noise = 3
+    x_train = samples(sample_size, n, period, noise)
+    x_test = samples(sample_size, n, period, noise)
 
     m = create_model(vector_shape(n))
 
@@ -110,19 +132,20 @@ def run():
 
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     periodicals = encoder.predict(x_train)  # bottleneck representation
-    Renc = m.predict(x_train)        # reconstruction
+    Renc = m.predict(x_train)               # reconstruction
 
-    baseline = encoder.predict(randoms(sample_size, n))  # no periodicity
+    baseline = encoder.predict(samples_fixed_period(sample_size, n, period, noise))  # no periodicity
     mixed = np.vstack([periodicals, baseline])
     n_total = np.shape(mixed)[0]
     ys = np.zeros([n_total, ])
     ys[sample_size:] = 1
 
-    calc_accuracy(mixed, periodicals, baseline, ys)
+    calc_accuracy(mixed, ys)
 
     plt = plot(mixed, Renc, n_total, ys, n)
 
     print(history.history.keys())
+    pd.DataFrame(mixed).to_csv("/tmp/bottlenecked.csv")
 
     # see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
     # summarize history for loss
