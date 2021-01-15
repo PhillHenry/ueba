@@ -57,4 +57,5 @@ if __name__ == "__main__":
         plt.imshow(xs, cmap=cm.Reds)
     plt.figtext(.6, .47, "Regular activity with noise")
     plt.figtext(.6, .95, "Mixed periods with noise")
+    plt.savefig("/tmp/data.png")
     plt.show()

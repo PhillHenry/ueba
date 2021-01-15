@@ -124,6 +124,15 @@ def plot_loss(history):
     plt.legend(['train', 'test'], loc='upper right')
 
 
+def representation_after_training(m, x_train, x_test):
+    history = m.fit(x_train, x_train, batch_size=128, epochs=20, verbose=1,
+                    validation_data=(x_test, x_test))
+
+    encoder = Model(m.input, m.get_layer('bottleneck').output)
+
+    return history, encoder
+
+
 def run():
     sample_size = 256
     n = 28
@@ -135,12 +144,10 @@ def run():
     m = create_model(vector_shape(n))
 
     print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
+    history, encoder = representation_after_training(m, x_train, x_test)
 
-    history = m.fit(x_train, x_train, batch_size=128, epochs=10, verbose=1,
-                    validation_data=(x_test, x_test))
-
-    encoder = Model(m.input, m.get_layer('bottleneck').output)
-    periodicals = encoder.predict(x_train)  # bottleneck representation
+    real = samples(sample_size, n, period, noise)
+    periodicals = encoder.predict(real)  # bottleneck representation
     Renc = m.predict(x_train)               # reconstruction
 
     baseline = encoder.predict(samples_fixed_period(sample_size, n, period, noise))  # no periodicity
@@ -151,15 +158,19 @@ def run():
 
     calc_accuracy(mixed, ys)
 
-    plt.subplot(311)
+    # plt.subplot(311)
     plot_clusters(mixed, n_total, ys)
-    plt.subplot(312)
+    plt.savefig("/tmp/cluster.png")
+    # plt.subplot(312)
     plot_reconstruction(Renc, n)
+    plt.savefig("/tmp/reconstruction.png")
     print(history.history.keys())
     pd.DataFrame(mixed).to_csv("/tmp/bottlenecked.csv")
 
-    plt.subplot(313)
+    # plt.subplot(313)
+    plt.clf()
     plot_loss(history)
+    plt.savefig("/tmp/history.png")
 
     plt.show()
 
