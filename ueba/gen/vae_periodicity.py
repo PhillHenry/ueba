@@ -69,17 +69,15 @@ def create_model(shape):
     return m
 
 
-def plot(Zenc, Renc, x, ys, n):
-    plt.subplot(311)
+def plot_clusters(Zenc, x, ys):
     plt.title('bottleneck representation')
     plt.scatter(Zenc[:x, 0], Zenc[:x, 1], c=ys, s=8, cmap='jet')
 
-    plt.subplot(312)
+
+def plot_reconstruction(Renc, n):
     arbitrary = np.reshape(Renc[0], [n, n])
     plt.title('random reconstruction')
     plt.imshow(arbitrary, cmap=cm.Reds)
-
-    return plt
 
 
 def correct(matching, x):
@@ -115,6 +113,18 @@ def matches(xs, ys):
     return n_correct
 
 
+def plot_loss(history):
+    # see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
+    # summarize history for loss
+
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper right')
+
+
 def run():
     sample_size = 256
     n = 28
@@ -142,20 +152,16 @@ def run():
 
     calc_accuracy(mixed, ys)
 
-    plt = plot(mixed, Renc, n_total, ys, n)
-
+    plt.subplot(311)
+    plot_clusters(mixed, n_total, ys)
+    plt.subplot(312)
+    plot_reconstruction(Renc, n)
     print(history.history.keys())
     pd.DataFrame(mixed).to_csv("/tmp/bottlenecked.csv")
 
-    # see https://machinelearningmastery.com/display-deep-learning-model-training-history-in-keras/
-    # summarize history for loss
     plt.subplot(313)
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper right')
+    plot_loss(history)
+
     plt.show()
 
 
