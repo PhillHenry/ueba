@@ -23,7 +23,7 @@ def test_matching_exactly_matching():
 
 def interleave(xs, ys):
     cs = np.empty(len(xs) + len(ys))
-    cs[0::2] = xs
+    cs[0::2] = xs  # 0::2 means "starting at 0, proceed in steps of 2"
     cs[1::2] = ys
     return cs
 

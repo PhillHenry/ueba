@@ -8,6 +8,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import matplotlib.cm as cm
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 import pandas as pd
 
 import ueba.gen.data as d
@@ -59,12 +60,13 @@ def randoms(num, n):
 
 def create_model(shape):
     m = Sequential()
+    print("shape = {}".format(shape))
     m.add(Dense(512,  activation='elu', input_shape=shape))
     m.add(Dense(128,  activation='elu'))
     m.add(Dense(2,    activation='linear', name="bottleneck"))
     m.add(Dense(128,  activation='elu'))
     m.add(Dense(512,  activation='elu'))
-    m.add(Dense(784,  activation='sigmoid'))
+    m.add(Dense(shape[0],  activation='sigmoid'))
     m.compile(loss='mean_squared_error', optimizer=Adam())
     return m
 
@@ -99,7 +101,7 @@ def calc_accuracy(mixed, ys):
 
     n_correct = matches(xs, ys)
 
-    print("accuracy {}".format(float(n_correct) / len(ys)))
+    print("KMeans accuracy = {}".format(float(n_correct) / len(ys)))
 
 
 def matches(xs, ys):
@@ -133,9 +135,16 @@ def representation_after_training(m, x_train, x_test):
     return history, encoder
 
 
+def outliers(coords):
+    scanned = DBSCAN(eps=0.4, min_samples=20).fit(coords)
+    categorized = list(zip(scanned.labels_, coords))
+    outliers = list(filter(lambda x: x[0] == -1, categorized))
+    return outliers
+
+
 def run():
     sample_size = 256
-    n = 28
+    n = 48
     period = 5
     noise = 3
     x_train = samples(sample_size, n, period, noise)
@@ -146,21 +155,26 @@ def run():
     print("x_train shape = {},  x_test shape = {}".format(np.shape(x_train), np.shape(x_test)))
     history, encoder = representation_after_training(m, x_train, x_test)
 
-    real = samples(sample_size, n, period, noise)
+    num_real_samples = 1
+    real = samples(num_real_samples, n, period, noise)
     periodicals = encoder.predict(real)  # bottleneck representation
-    Renc = m.predict(x_train)               # reconstruction
+    Renc = m.predict(x_train)            # reconstruction
 
     baseline = encoder.predict(samples_fixed_period(sample_size, n, period, noise))  # no periodicity
     mixed = np.vstack([periodicals, baseline])
     n_total = np.shape(mixed)[0]
+
+    print("outliers = {}".format(outliers(mixed)))
+
     ys = np.zeros([n_total, ])
-    ys[sample_size:] = 1
+    ys[num_real_samples:] = 1
 
     calc_accuracy(mixed, ys)
 
     # plt.subplot(311)
     plot_clusters(mixed, n_total, ys)
     plt.savefig("/tmp/cluster.png")
+    plt.show()
     # plt.subplot(312)
     plot_reconstruction(Renc, n)
     plt.savefig("/tmp/reconstruction.png")
@@ -171,8 +185,6 @@ def run():
     plt.clf()
     plot_loss(history)
     plt.savefig("/tmp/history.png")
-
-    plt.show()
 
 
 if __name__ == "__main__":
