@@ -11,6 +11,10 @@ num_unique_words = len(unique_words)
 line2_bigrams = ["overthe", "thelazy", "lazydog"]
 
 
+def test_delimiting():
+    assert(to_test.splitting("ls -ltr /home/henryp/test.txt".split()) == "home henryp test.txt".split())
+
+
 def test_max_length_of():
     assert(to_test.max_length_of([words_line1, words_line2]) == 5)
 

@@ -23,12 +23,21 @@ def all_ngrams_of(words, n):
     return ngrams
 
 
+def splitting(words, delimiter="/"):
+    independent = []
+    for word in words:
+        if delimiter in word:
+            purged = word.replace(delimiter, " ")
+            independent += purged.split()
+    return independent
+
+
 def enhance(lines, n):
     enhanced = []
     for line in lines:
         words = line.split()
-        words = words + all_ngrams_of(words, n)
-        enhanced.append(" ".join(words))
+        words_with_ngrams = words + all_ngrams_of(words, n)
+        enhanced.append(" ".join(words_with_ngrams + splitting(words)))
     return enhanced
 
 
@@ -94,7 +103,7 @@ def train(vs):
     x_train = vectors[:train_size]
     x_test = vectors[train_size:]
     print("Train size = {}, test size = {}, vector length = {}".format(len(x_train), len(x_test), vec_length))
-    history = m.fit(x_train, x_train, batch_size=1, epochs=170, verbose=1, validation_data=(x_test, x_test))
+    history = m.fit(x_train, x_train, batch_size=2, epochs=170, verbose=1, validation_data=(x_test, x_test))
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     return history, encoder
 
@@ -151,5 +160,6 @@ if __name__ == "__main__":
     ys = read(sys.argv[2])
     xs_enhanced = enhance(xs, 3)
     ys_enhanced = enhance(ys, 3)
+    print("Typical data:\n{}\n{}".format("\n".join(xs_enhanced[:3]), "\n".join(ys_enhanced[:3])))
     run(xs_enhanced, ys_enhanced, 256)
 
