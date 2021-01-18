@@ -10,15 +10,23 @@ from random import shuffle
 from functools import reduce
 
 
-def ngrams(words, n=2):
-    return list(map(lambda x: "{}{}".format(x[0], x[1]), zip(words, words[1:])))
+def ngrams_of(words, n=2):
+    xss = [words[i:] for i in range(n)]
+    return reduce(lambda acc, x: ["".join((a, b)) for a, b in zip(acc, x) ], xss)
+
+
+def all_ngrams_of(words, n):
+    ngrams = []
+    for i in range(2, n+1):
+        ngrams += ngrams_of(words, i)
+    return ngrams
 
 
 def enhance(lines):
     enhanced = []
     for line in lines:
         words = line.split()
-        words = words + ngrams(words)
+        words = words + ngrams_of(words)
         enhanced.append(" ".join(words))
     return enhanced
 

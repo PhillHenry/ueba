@@ -16,7 +16,11 @@ def test_max_length_of():
 
 
 def test_bigrams():
-    assert(to_test.ngrams(line2.split(), 2) == line2_bigrams)
+    assert(to_test.ngrams_of(words_line2, 2) == line2_bigrams)
+
+
+def test_trigrams():
+    assert(len(to_test.all_ngrams_of(words_line2, 3)) == len(line2_bigrams) + 2)
 
 
 def test_enhance():
