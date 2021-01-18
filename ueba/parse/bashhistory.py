@@ -6,13 +6,28 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import numpy as np
 import pylab as plt
+from random import shuffle
+from functools import reduce
+
+
+def ngrams(words, n=2):
+    return list(map(lambda x: "{}{}".format(x[0], x[1]), zip(words, words[1:])))
+
+
+def enhance(lines):
+    enhanced = []
+    for line in lines:
+        words = line.split()
+        words = words + ngrams(words)
+        enhanced.append(" ".join(words))
+    return enhanced
 
 
 def index_words(lines, word_index={}):
     max_index = 0
     for line in lines:
-        xs = line.split()
-        for x in xs:
+        words = line.split()
+        for x in words:
             if word_index.get(x) is None:
                 word_index[x] = max_index
                 max_index += 1
@@ -73,13 +88,27 @@ def train(vectors):
     return history, encoder
 
 
-def run(lines1, lines2):
-    vec_length = 16
+def max_length_of(xs):
+    max_length = 0
+    for x in xs:
+        max_length = max(max_length, len(x))
+    return max_length
+
+
+def run(lines1, lines2, max_vector_length):
 
     dictionary = index_words(lines1)
     dictionary = index_words(lines2, dictionary)
-    vectors1 = truncate_or_pad(vectorize(lines1, dictionary), vec_length)
-    vectors2 = truncate_or_pad(vectorize(lines2, dictionary), vec_length)
+
+    vector1 = vectorize(lines1, dictionary)
+    vector2 = vectorize(lines2, dictionary)
+
+    vec_length = min(max_vector_length, max(max_length_of(vector1), max_length_of(vector2)))
+    print("vec_length = {}".format(vec_length))
+    vectors1 = truncate_or_pad(vector1, vec_length)
+    vectors2 = truncate_or_pad(vector2, vec_length)
+    shuffle(vectors1)
+    shuffle(vectors2)
 
     history, encoder = train(vectors1)
     vec1_representation = encoder.predict(np.vstack(vectors1))
@@ -94,11 +123,14 @@ def run(lines1, lines2):
 
     plt.subplot(212)
     vae.plot_loss(history)
+    plt.savefig("/tmp/bash_history.png")
     plt.show()
 
 
 if __name__ == "__main__":
     xs = read(sys.argv[1])
     ys = read(sys.argv[2])
-    run(xs, ys)
+    xs_enhanced = enhance(xs)
+    ys_enhanced = enhance(ys)
+    run(xs_enhanced, ys_enhanced, 256)
 

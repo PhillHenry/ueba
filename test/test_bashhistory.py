@@ -8,6 +8,19 @@ words_line1 = line1.split()
 words_line2 = line2.split()
 unique_words = set(words_line1).union(set(words_line2))
 num_unique_words = len(unique_words)
+line2_bigrams = ["overthe", "thelazy", "lazydog"]
+
+
+def test_max_length_of():
+    assert(to_test.max_length_of([words_line1, words_line2]) == 5)
+
+
+def test_bigrams():
+    assert(to_test.ngrams(line2.split(), 2) == line2_bigrams)
+
+
+def test_enhance():
+    assert(to_test.enhance([line2]) == ["{} {}".format(line2, " ".join(line2_bigrams))])
 
 
 def test_index_lines():
