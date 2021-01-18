@@ -1,9 +1,8 @@
 import sys
 
 
-def index_words(lines):
+def index_words(lines, word_index={}):
     max_index = 0
-    word_index = {}
     for line in lines:
         xs = line.split()
         for x in xs:
@@ -13,7 +12,15 @@ def index_words(lines):
     return word_index
 
 
-if __name__ == "__main__":
-    history1 = sys.argv[1]
+def vectorise(lines, word_index):
+    vectors = []
+    for line in lines:
+        xs = line.split()
+        vectors.append([word_index[x] for x in xs])
+    return vectors
 
-    print(index_words(open(history1, "r")))
+
+
+if __name__ == "__main__":
+    dictionary = index_words(open(sys.argv[1], "r"))
+    dictionary = index_words(open(sys.argv[2], "r"), dictionary)
