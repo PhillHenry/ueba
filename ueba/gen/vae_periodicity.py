@@ -135,8 +135,8 @@ def representation_after_training(m, x_train, x_test):
     return history, encoder
 
 
-def outliers(coords):
-    scanned = DBSCAN(eps=0.4, min_samples=20).fit(coords)
+def outliers(coords, eps=0.4, min_samples=20):
+    scanned = DBSCAN(eps=eps, min_samples=min_samples).fit(coords)
     categorized = list(zip(scanned.labels_, coords))
     outliers = list(filter(lambda x: x[0] == -1, categorized))
     return outliers

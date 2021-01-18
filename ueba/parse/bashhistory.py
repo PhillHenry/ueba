@@ -8,6 +8,7 @@ import numpy as np
 import pylab as plt
 from random import shuffle
 from functools import reduce
+import pandas as pd
 
 
 def ngrams_of(words, n=2):
@@ -83,7 +84,9 @@ def create_model(n):
     return m
 
 
-def train(vectors):
+def train(vs):
+    vectors = vs.copy()
+    shuffle(vectors)
     vec_length = len(vectors[0])
     vectors = np.vstack(vectors)
     m = create_model(vec_length)
@@ -91,7 +94,7 @@ def train(vectors):
     x_train = vectors[:train_size]
     x_test = vectors[train_size:]
     print("Train size = {}, test size = {}, vector length = {}".format(len(x_train), len(x_test), vec_length))
-    history = m.fit(x_train, x_train, batch_size=2, epochs=200, verbose=1, validation_data=(x_test, x_test))
+    history = m.fit(x_train, x_train, batch_size=1, epochs=170, verbose=1, validation_data=(x_test, x_test))
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     return history, encoder
 
@@ -124,8 +127,6 @@ def run(lines1, lines2, max_vector_length):
     print("vec_length = {}".format(vec_length))
     vectors1 = truncate_or_pad(vector1, vec_length)
     vectors2 = truncate_or_pad(vector2, vec_length)
-    shuffle(vectors1)
-    shuffle(vectors2)
 
     history, encoder = train(vectors1)
     vec1_representation = encoder.predict(np.vstack(vectors1))
@@ -136,6 +137,7 @@ def run(lines1, lines2, max_vector_length):
     ys[len(vectors1):] = 1
 
     plt.subplot(211)
+    pd.DataFrame(mixed).to_csv("/tmp/bash_history.csv")
     vae.plot_clusters(mixed, n_total, ys)
 
     plt.subplot(212)
