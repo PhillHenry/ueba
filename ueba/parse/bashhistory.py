@@ -49,12 +49,13 @@ def read(file):
 
 def create_model(n):
     m = Sequential()
-    m.add(Dense(n,      activation='elu', input_shape=(n,)))
-    m.add(Dense(n//2,   activation='elu'))
-    m.add(Dense(2,      activation='linear', name="bottleneck"))
-    m.add(Dense(n//2,   activation='elu'))
-    m.add(Dense(n,      activation='elu'))
-    m.add(Dense(n,      activation='sigmoid'))
+    hidden_size = 3 * n//4
+    m.add(Dense(n,              activation='elu', input_shape=(n,)))
+    m.add(Dense(hidden_size,    activation='elu'))
+    m.add(Dense(2,              activation='linear', name="bottleneck"))
+    m.add(Dense(hidden_size,    activation='elu'))
+    m.add(Dense(n,              activation='elu'))
+    # m.add(Dense(n,              activation='sigmoid'))
     m.compile(loss='mean_squared_error', optimizer=Adam())
     return m
 
@@ -67,7 +68,7 @@ def train(vectors):
     x_train = vectors[:train_size]
     x_test = vectors[train_size:]
     print("Train size = {}, test size = {}, vector length = {}".format(len(x_train), len(x_test), vec_length))
-    history = m.fit(x_train, x_train, batch_size=4, epochs=200, verbose=1, validation_data=(x_test, x_test))
+    history = m.fit(x_train, x_train, batch_size=4, epochs=100, verbose=1, validation_data=(x_test, x_test))
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     return history, encoder
 
@@ -81,8 +82,18 @@ def run(lines1, lines2):
     vectors2 = truncate_or_pad(vectorize(lines2, dictionary), vec_length)
 
     history, encoder = train(vectors1)
-    vae.plot_loss(history)
+    vec1_representation = encoder.predict(np.vstack(vectors1))
+    vec2_representation = encoder.predict(np.vstack(vectors2))
+    mixed = np.vstack([vec1_representation, vec2_representation])
+    n_total = len(mixed)
+    ys = np.zeros([n_total, ])
+    ys[len(vectors1):] = 1
 
+    plt.subplot(211)
+    vae.plot_clusters(mixed, n_total, ys)
+
+    plt.subplot(212)
+    vae.plot_loss(history)
     plt.show()
 
 
