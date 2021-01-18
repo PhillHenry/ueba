@@ -22,7 +22,7 @@ def test_index_lines():
 def test_vectorize():
     word_to_index = to_test.index_words([line1, line2])
     index_to_word = dict((v, k) for k, v in word_to_index.items())
-    vectors = to_test.vectorise([line1, line2], word_to_index)
+    vectors = to_test.vectorize([line1, line2], word_to_index)
     assert(len(vectors) == 2)
     actual = set()
     for vector in vectors:
@@ -31,3 +31,8 @@ def test_vectorize():
         actual.add(" ".join(words))
     assert(actual == set([line1, line2]))
 
+
+def test_truncate_or_pad():
+    vectors = [[1, 2, 3], [4, 5, 6, 7, 8]]
+    actual = to_test.truncate_or_pad(vectors, 4)
+    assert(actual == [[1, 2, 3, 0], [4, 5, 6, 7]])

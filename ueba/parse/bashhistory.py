@@ -12,13 +12,25 @@ def index_words(lines, word_index={}):
     return word_index
 
 
-def vectorise(lines, word_index):
+def vectorize(lines, word_index):
     vectors = []
     for line in lines:
         xs = line.split()
         vectors.append([word_index[x] for x in xs])
     return vectors
 
+
+def truncate_or_pad(vs, n):
+    sized = []
+    for v in vs:
+        length = len(v)
+        if length > n:
+            sized.append(v[:n])
+        else:
+            padding = [0] * (n - length)
+            v = v + padding
+            sized.append(v)
+    return sized
 
 
 if __name__ == "__main__":
