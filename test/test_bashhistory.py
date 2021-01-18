@@ -20,11 +20,11 @@ def test_bigrams():
 
 
 def test_trigrams():
-    assert(len(to_test.all_ngrams_of(words_line2, 3)) == len(line2_bigrams) + 2)
+    assert(to_test.all_ngrams_of(words_line2, 3) == line2_bigrams + ['overthelazy', 'thelazydog'])
 
 
 def test_enhance():
-    assert(to_test.enhance([line2]) == ["{} {}".format(line2, " ".join(line2_bigrams))])
+    assert(to_test.enhance([line2], 2) == ["{} {}".format(line2, " ".join(line2_bigrams))])
 
 
 def test_index_lines():
