@@ -111,19 +111,24 @@ def find_patterns_in(filename):
     raw = as_matrix(points).transpose()
     frequencies = fourier_of(raw)
 
-    # f, (ax1, ax2) = plt.subplots(2, 1)
-    plt.subplot(211)
-    plt.imshow(raw, cmap=cm.Reds)
+    f, (ax1, ax2) = plt.subplots(2, 1, sharey=False)
+    # plt.subplot(211)
+    # ax1.imshow(raw, cmap=cm.Reds)
     plot_points = np.vstack(points)
     max_y = max(plot_points[:, 0])
-    plt.ylim(0, max_y)
-    plt.scatter(plot_points[:, 1], plot_points[:, 0], s=2, vmin=0, vmax=20)
-    plt.title("Events")
+    ax1.set_ylim(0, max_y)
+    kvs = [(k, v) for k, v in label_to_index.items()]
+    kvs.sort(key=lambda x: x[1])
+    print(label_to_index)
+    y_labels = list(map(lambda x: x[0], kvs))
+    print(y_labels)
+    # ax1.set_yticklabels(y_labels)
+    ax1.scatter(plot_points[:, 1], plot_points[:, 0], s=2)
+    ax1.set_title("Events")
 
-    plt.subplot(212)
     xticks = ticks_for(frequencies)
-    plt.plot(xticks, frequencies)
-    plt.title("Frequencies")
+    ax2.plot(xticks, frequencies)
+    ax2.set_title("Frequencies")
 
     maxes = max_in_columns_of(frequencies)
 
