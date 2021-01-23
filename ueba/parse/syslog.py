@@ -98,11 +98,11 @@ def infrequent(threshold, maxes, label_to_index):
     print(len(maxes))
     max_freq = max(maxes)
     index_to_label = dict((v, k) for k, v in label_to_index.items())
-    infrequent_labels = []
+    irregular_labels = []
     for i, mx in enumerate(maxes):
         if mx < threshold * max_freq:
-            infrequent_labels.append(index_to_label[i])
-    return infrequent_labels
+            irregular_labels.append(index_to_label[i])
+    return irregular_labels
 
 
 def find_patterns_in(filename):
@@ -114,13 +114,15 @@ def find_patterns_in(filename):
     f, (ax1, ax2) = plt.subplots(2, 1)
 
     ax1.imshow(raw, cmap=cm.Reds)
+    plot_points = np.vstack(points)
+    max_y = max(plot_points[:, 0])
+    ax1.set_ylim(0, max_y)
+    ax1.scatter(plot_points[:, 1], plot_points[:, 0], s=2, vmin=0, vmax=20)
 
     xticks = ticks_for(frequencies)
     ax2.plot(xticks, frequencies)
 
     maxes = max_in_columns_of(frequencies)
-
-    print(maxes)
 
     print(infrequent(0.2, maxes, label_to_index))
 
