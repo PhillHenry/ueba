@@ -5,6 +5,7 @@ import ueba.parse.files as fi
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import re
 
 
 class SyslogEntry:
@@ -20,7 +21,8 @@ def parse(filename):
         items = line.split(" ")
         date = " ".join(items[:3])
         epoch = parse_to_epoch(date)
-        label = items[4]
+        strip_pid = re.compile(r"\[.*", re.IGNORECASE)
+        label = strip_pid.sub("", items[4])
         entry = SyslogEntry(epoch, label)
         parsed.append(entry)
     return parsed
@@ -67,21 +69,31 @@ def as_matrix(filename, max_y=200):
     raw = np.zeros([max_x, max_y + 1])
 
     for pt in points:
-        y = int((pt[1] / max_time) * max_y)
+        y = int(pt[1] * max_y / max_time)
         x = pt[0]
         raw[x, y] = raw[x, y] + 1
 
     return raw
 
 
+# from 2DFFT - TODO change that filename so we can import it
+def ticks_for(frequencies):
+    fr = np.fft.fftfreq(frequencies.shape[0])
+    return np.fft.fftshift(fr)
+
+
 def fourier_of(filename):
-    raw = as_matrix(filename)
+    raw = as_matrix(filename).transpose()
     raw -= raw.mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
-    # f, (ax1, ax2) = plt.subplots(2, 1)
+    f, (ax1, ax2) = plt.subplots(2, 1)
 
-    plt.imshow(raw, cmap=cm.Reds)
+    ax1.imshow(raw, cmap=cm.Reds)
+
+    xticks = ticks_for(frequencies)
+    ax2.plot(xticks, frequencies)
+
     plt.show()
 
 
