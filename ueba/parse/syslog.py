@@ -50,16 +50,14 @@ def vectorize(logs):
     points = []
     for x in logs:
         if label_to_index.get(x.label) is None:
-            print(x.label)
             label_to_index[x.label] = label_counter
             label_counter += 1
         points.append([label_to_index[x.label], x.time])
-    return points
+    return points, label_to_index
 
 
-def as_matrix(filename, max_y=200):
-    parsed = parse(filename)
-    points = vectorize(parsed)
+def as_matrix(points, max_y=200):
+
     max_time = max(map(lambda x: x[1], points))
     labels = set(map(lambda x: x[0], points))
     max_x = len(labels)
@@ -82,11 +80,37 @@ def ticks_for(frequencies):
     return np.fft.fftshift(fr)
 
 
-def fourier_of(filename):
-    raw = as_matrix(filename).transpose()
-    raw -= raw.mean()
+def fourier_of(raw):
+    raw -= raw.copy().mean()
     Z = np.fft.fftn(raw)
     frequencies = np.fft.fftshift(np.abs(Z))
+    return frequencies
+
+
+def max_in_columns_of(m):
+    maxes = []
+    for col_idx in range(np.shape(m)[1]):
+        maxes.append(max(m[:,col_idx]))
+    return maxes
+
+
+def infrequent(threshold, maxes, label_to_index):
+    print(len(maxes))
+    max_freq = max(maxes)
+    index_to_label = dict((v, k) for k, v in label_to_index.items())
+    infrequent_labels = []
+    for i, mx in enumerate(maxes):
+        if mx < threshold * max_freq:
+            infrequent_labels.append(index_to_label[i])
+    return infrequent_labels
+
+
+def find_patterns_in(filename):
+    parsed = parse(filename)
+    points, label_to_index = vectorize(parsed)
+    raw = as_matrix(points).transpose()
+    frequencies = fourier_of(raw)
+
     f, (ax1, ax2) = plt.subplots(2, 1)
 
     ax1.imshow(raw, cmap=cm.Reds)
@@ -94,8 +118,13 @@ def fourier_of(filename):
     xticks = ticks_for(frequencies)
     ax2.plot(xticks, frequencies)
 
+    maxes = max_in_columns_of(frequencies)
+
+    print(maxes)
+
+    print(infrequent(0.2, maxes, label_to_index))
+
     plt.show()
 
-
 if __name__ == "__main__":
-    fourier_of(sys.argv[1])
+    find_patterns_in(sys.argv[1])

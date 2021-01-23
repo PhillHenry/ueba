@@ -19,7 +19,7 @@ def test_vectorize():
     n = 29
     label_cardinality = 7
     xs = create_logs(label_cardinality=label_cardinality, n=n)
-    points = to_test.vectorize(xs)
+    points, _ = to_test.vectorize(xs)
     assert(len(points) == len(xs))
     labels = set(map(lambda x: x[0], points))
     assert(len(labels) == label_cardinality)
