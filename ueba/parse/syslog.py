@@ -111,22 +111,28 @@ def find_patterns_in(filename):
     raw = as_matrix(points).transpose()
     frequencies = fourier_of(raw)
 
-    f, (ax1, ax2) = plt.subplots(2, 1)
-
-    ax1.imshow(raw, cmap=cm.Reds)
+    # f, (ax1, ax2) = plt.subplots(2, 1)
+    plt.subplot(211)
+    plt.imshow(raw, cmap=cm.Reds)
     plot_points = np.vstack(points)
     max_y = max(plot_points[:, 0])
-    ax1.set_ylim(0, max_y)
-    ax1.scatter(plot_points[:, 1], plot_points[:, 0], s=2, vmin=0, vmax=20)
+    plt.ylim(0, max_y)
+    plt.scatter(plot_points[:, 1], plot_points[:, 0], s=2, vmin=0, vmax=20)
+    plt.title("Events")
 
+    plt.subplot(212)
     xticks = ticks_for(frequencies)
-    ax2.plot(xticks, frequencies)
+    plt.plot(xticks, frequencies)
+    plt.title("Frequencies")
 
     maxes = max_in_columns_of(frequencies)
 
-    print(infrequent(0.2, maxes, label_to_index))
+    print("All labels: {}".format([k for k, v in label_to_index.items()]))
+    print("irregular entries have labels: {}".format(infrequent(0.15, maxes, label_to_index)))
 
+    plt.savefig("/tmp/syslog.png")
     plt.show()
+
 
 if __name__ == "__main__":
     find_patterns_in(sys.argv[1])
