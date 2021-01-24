@@ -18,7 +18,7 @@ def parse(filename):
     lines = fi.read(filename)
     parsed = []
     for line in lines:
-        items = line.split(" ")
+        items = list(filter(lambda x: x != "", line.split(" ")))
         date = " ".join(items[:3])
         epoch = parse_to_epoch(date)
         strip_pid = re.compile(r"\[.*", re.IGNORECASE)
