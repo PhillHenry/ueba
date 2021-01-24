@@ -29,7 +29,7 @@ def parse(filename):
 
 
 def parse_to_epoch(date):
-    return time.mktime(datetime.datetime.strptime(date, "%b %d %I:%M:%S").timetuple())
+    return time.mktime(datetime.datetime.strptime(date, "%b %d %H:%M:%S").timetuple())
 
 
 def min_time_of(logs):

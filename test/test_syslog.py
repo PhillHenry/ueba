@@ -6,7 +6,7 @@ def create_logs(n=20, offset=42, label_cardinality=7):
 
 
 def test_parse_syslog_time():
-    assert(to_test.parse_to_epoch('Jan 22 08:41:41') == -2207143099.0)
+    assert(to_test.parse_to_epoch('Jan 22 14:41:41') == -2207121499.0)
 
 
 def test_normalize_time():
