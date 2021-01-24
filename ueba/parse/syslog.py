@@ -23,6 +23,8 @@ def parse(filename):
         epoch = parse_to_epoch(date)
         strip_pid = re.compile(r"\[.*", re.IGNORECASE)
         label = strip_pid.sub("", items[4])
+        # if label.startswith("kernel:"):
+        #     label += items[6]
         entry = SyslogEntry(epoch, label)
         parsed.append(entry)
     return parsed
@@ -94,15 +96,35 @@ def max_in_columns_of(m):
     return maxes
 
 
+def index_to_labels(label_to_index):
+    return dict((v, k) for k, v in label_to_index.items())
+
+
 def infrequent(threshold, maxes, label_to_index):
-    print(len(maxes))
     max_freq = max(maxes)
-    index_to_label = dict((v, k) for k, v in label_to_index.items())
+    index_to_label = index_to_labels(label_to_index)
     irregular_labels = []
     for i, mx in enumerate(maxes):
         if mx < threshold * max_freq:
-            irregular_labels.append(index_to_label[i])
+            label = index_to_label[i]
+            print("label = {}, max = {}".format(label, mx))
+            irregular_labels.append(label)
     return irregular_labels
+
+
+def labels_to_maxes(maxes, label_to_index):
+    index_to_label = index_to_labels(label_to_index)
+    label_to_max = {}
+    for i, mx in enumerate(maxes):
+        label = index_to_label[i]
+        label_to_max[label] = mx
+    return label_to_max
+
+
+def sort_on_value(dictionary):
+    kvs = [(k, v) for k, v in dictionary.items()]
+    kvs.sort(key=lambda x: x[1])
+    return kvs
 
 
 def find_patterns_in(filename):
@@ -117,8 +139,7 @@ def find_patterns_in(filename):
     plot_points = np.vstack(points)
     max_y = max(plot_points[:, 0])
     ax1.set_ylim(0, max_y)
-    kvs = [(k, v) for k, v in label_to_index.items()]
-    kvs.sort(key=lambda x: x[1])
+    kvs = sort_on_value(label_to_index)
     print(label_to_index)
     y_labels = list(map(lambda x: x[0], kvs))
     print(y_labels)
@@ -131,6 +152,11 @@ def find_patterns_in(filename):
     ax2.set_title("Frequencies")
 
     maxes = max_in_columns_of(frequencies)
+
+    label_to_max = labels_to_maxes(maxes, label_to_index)
+    label_maxes = sort_on_value(label_to_max)
+    for l, m in label_maxes:
+        print("%40s%20f" % (l, m))
 
     print("All labels: {}".format([k for k, v in label_to_index.items()]))
     print("irregular entries have labels: {}".format(infrequent(0.15, maxes, label_to_index)))
