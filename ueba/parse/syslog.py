@@ -23,8 +23,8 @@ def parse(filename):
         epoch = parse_to_epoch(date)
         strip_pid = re.compile(r"\[.*", re.IGNORECASE)
         label = strip_pid.sub("", items[4])
-        # if label.startswith("kernel:"):
-        #     label += items[6]
+        if label.startswith("kernel") and "UFW" in items[6]:
+            label += items[6]
         entry = SyslogEntry(epoch, label)
         parsed.append(entry)
     return parsed
