@@ -107,7 +107,6 @@ def infrequent(threshold, maxes, label_to_index):
     for i, mx in enumerate(maxes):
         if mx < threshold * max_freq:
             label = index_to_label[i]
-            print("label = {}, max = {}".format(label, mx))
             irregular_labels.append(label)
     return irregular_labels
 
@@ -140,9 +139,7 @@ def find_patterns_in(filename):
     max_y = max(plot_points[:, 0])
     ax1.set_ylim(0, max_y)
     kvs = sort_on_value(label_to_index)
-    print(label_to_index)
     y_labels = list(map(lambda x: x[0], kvs))
-    print(y_labels)
     # ax1.set_yticklabels(y_labels)
     ax1.scatter(plot_points[:, 1], plot_points[:, 0], s=2)
     ax1.set_title("Events")
@@ -155,11 +152,9 @@ def find_patterns_in(filename):
 
     label_to_max = labels_to_maxes(maxes, label_to_index)
     label_maxes = sort_on_value(label_to_max)
-    for l, m in label_maxes:
-        print("%40s%20f" % (l, m))
-
-    print("All labels: {}".format([k for k, v in label_to_index.items()]))
-    print("irregular entries have labels: {}".format(infrequent(0.15, maxes, label_to_index)))
+    print("syslog contributors (least regular to most regular):")
+    for label, mx in label_maxes:
+        print("%40s%20f" % (label, mx))
 
     plt.savefig("/tmp/syslog.png")
     plt.show()
