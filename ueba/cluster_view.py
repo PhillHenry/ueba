@@ -41,6 +41,9 @@ def plot_3d(data):
 
 
 if __name__ == "__main__":
+    """
+    Takes one argument that is the CSV file of the points co-ordinates. First column is the index. First row is the column names.
+    """
     my_data = np.genfromtxt(sys.argv[1], delimiter=',')
     find_outliers_in(my_data)
     if np.shape(my_data)[1] == 4:
