@@ -80,7 +80,7 @@ def create_model(n):
     hidden_size = 3 * n//4
     m.add(Dense(n,              activation='elu', input_shape=(n,)))
     m.add(Dense(hidden_size,    activation='elu'))
-    m.add(Dense(2,              activation='linear', name="bottleneck"))
+    m.add(Dense(3,              activation='linear', name="bottleneck"))
     m.add(Dense(hidden_size,    activation='elu'))
     m.add(Dense(n,              activation='elu'))
     m.compile(loss='mean_squared_error', optimizer=Adam())
@@ -97,7 +97,7 @@ def train(vs):
     x_train = vectors[:train_size]
     x_test = vectors[train_size:]
     print("Train size = {}, test size = {}, vector length = {}".format(len(x_train), len(x_test), vec_length))
-    history = m.fit(x_train, x_train, batch_size=1, epochs=200, verbose=1, validation_data=(x_test, x_test))
+    history = m.fit(x_train, x_train, batch_size=2, epochs=10, verbose=1, validation_data=(x_test, x_test))
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     return history, encoder
 

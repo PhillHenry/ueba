@@ -8,7 +8,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import matplotlib.cm as cm
 from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
+import ueba.cluster_view as clust
 import pandas as pd
 
 import ueba.gen.data as d
@@ -135,13 +135,6 @@ def representation_after_training(m, x_train, x_test):
     return history, encoder
 
 
-def outliers(coords, eps=0.4, min_samples=20):
-    scanned = DBSCAN(eps=eps, min_samples=min_samples).fit(coords)
-    categorized = list(zip(scanned.labels_, coords))
-    outliers = list(filter(lambda x: x[0] == -1, categorized))
-    return outliers
-
-
 def run():
     sample_size = 256
     n = 48
@@ -164,7 +157,7 @@ def run():
     mixed = np.vstack([periodicals, baseline])
     n_total = np.shape(mixed)[0]
 
-    print("outliers = {}".format(outliers(mixed)))
+    print("outliers = {}".format(clust.outliers(mixed)))
 
     ys = np.zeros([n_total, ])
     ys[num_real_samples:] = 1
