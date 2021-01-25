@@ -1,11 +1,13 @@
-import time
 import datetime
-import sys
-import ueba.parse.files as fi
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import re
+import sys
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+import ueba.parse.files as fi
+import ueba.gen.two_dimension_fourier_transform as ft
 
 
 class SyslogEntry:
@@ -76,12 +78,6 @@ def as_matrix(points, max_y=200):
     return raw
 
 
-# from 2DFFT - TODO change that filename so we can import it
-def ticks_for(frequencies):
-    fr = np.fft.fftfreq(frequencies.shape[0])
-    return np.fft.fftshift(fr)
-
-
 def fourier_of(raw):
     raw -= raw.copy().mean()
     Z = np.fft.fftn(raw)
@@ -133,18 +129,13 @@ def find_patterns_in(filename):
     frequencies = fourier_of(raw)
 
     f, (ax1, ax2) = plt.subplots(2, 1, sharey=False)
-    # plt.subplot(211)
-    # ax1.imshow(raw, cmap=cm.Reds)
     plot_points = np.vstack(points)
     max_y = max(plot_points[:, 0])
     ax1.set_ylim(0, max_y)
-    kvs = sort_on_value(label_to_index)
-    y_labels = list(map(lambda x: x[0], kvs))
-    # ax1.set_yticklabels(y_labels)
     ax1.scatter(plot_points[:, 1], plot_points[:, 0], s=2)
     ax1.set_title("Events")
 
-    xticks = ticks_for(frequencies)
+    xticks = ft.ticks_for(frequencies)
     ax2.plot(xticks, frequencies)
     ax2.set_title("Frequencies")
 
