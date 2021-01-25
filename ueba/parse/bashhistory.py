@@ -152,6 +152,9 @@ def run(lines1, lines2, max_vector_length):
 if __name__ == "__main__":
     """
     python ueba/parse/bashhistory.py BASH_HISTORY_FILE_1 BASH_HISTORY_FILE_2
+    
+    Then run:
+    for i in `printf '%s\n' SPACE_DELIMITED_OUTLIER_INDICES` ; do { sed -n "`expr ${i} + 1`p" YOUR_FILE ; }  done
     """
     xs = fi.read(sys.argv[1])
     ys = fi.read(sys.argv[2])
