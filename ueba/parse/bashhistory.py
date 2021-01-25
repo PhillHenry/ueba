@@ -1,14 +1,15 @@
 import sys
-import ueba.gen.vae_periodicity as vae
-import keras
-from keras.models import Sequential, Model
-from keras.layers import Dense
-from keras.optimizers import Adam
-import numpy as np
-import pylab as plt
-from random import shuffle
 from functools import reduce
+from random import shuffle
+
+import numpy as np
 import pandas as pd
+import pylab as plt
+from keras.layers import Dense
+from keras.models import Sequential, Model
+from keras.optimizers import Adam
+
+import ueba.gen.vae_periodicity as vae
 import ueba.parse.files as fi
 
 
@@ -82,7 +83,6 @@ def create_model(n):
     m.add(Dense(2,              activation='linear', name="bottleneck"))
     m.add(Dense(hidden_size,    activation='elu'))
     m.add(Dense(n,              activation='elu'))
-    # m.add(Dense(n,              activation='sigmoid'))
     m.compile(loss='mean_squared_error', optimizer=Adam())
     return m
 
@@ -97,7 +97,7 @@ def train(vs):
     x_train = vectors[:train_size]
     x_test = vectors[train_size:]
     print("Train size = {}, test size = {}, vector length = {}".format(len(x_train), len(x_test), vec_length))
-    history = m.fit(x_train, x_train, batch_size=1, epochs=100, verbose=1, validation_data=(x_test, x_test))
+    history = m.fit(x_train, x_train, batch_size=1, epochs=200, verbose=1, validation_data=(x_test, x_test))
     encoder = Model(m.input, m.get_layer('bottleneck').output)
     return history, encoder
 
@@ -150,6 +150,9 @@ def run(lines1, lines2, max_vector_length):
 
 
 if __name__ == "__main__":
+    """
+    python ueba/parse/bashhistory.py BASH_HISTORY_FILE_1 BASH_HISTORY_FILE_2
+    """
     xs = fi.read(sys.argv[1])
     ys = fi.read(sys.argv[2])
     xs_enhanced = enhance(xs, 3)

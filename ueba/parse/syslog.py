@@ -152,4 +152,7 @@ def find_patterns_in(filename):
 
 
 if __name__ == "__main__":
+    """
+    python ueba/parse/syslog.py SYSLOG_FILE
+    """
     find_patterns_in(sys.argv[1])
